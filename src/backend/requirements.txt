@@ -1,0 +1,6 @@
+uvicorn
+fastapi
+pylint
+pytest
+fastapi-users[sqlalchemy2]
+asyncpg

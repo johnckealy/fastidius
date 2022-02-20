@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+
+  # PostgreSQL development environment database
+  db:
+    image: postgres:12-alpine
+    volumes:
+    - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ubuntu
+      POSTGRES_PASSWORD: secrets
+      POSTGRES_DB: fasty_test
+    ports:
+    - "5433:5432"
+
+  # Isolated database for unit tests
+  test-db:
+    image: postgres:12-alpine
+    volumes:
+    - /tmp:/tmp
+    environment:
+      POSTGRES_USER: ubuntu
+      POSTGRES_PASSWORD: secret_test
+      POSTGRES_DB: fasty_test
+
+  # FastAPI backend
+  app:
+    build:
+      context: ./backend
+    depends_on:
+    - db
+    ports:
+    - "8001:8001"
+    stop_signal: SIGINT
+    command: uvicorn backend.main:app --reload --host 0.0.0.0 --port 8001
+    environment:
+      PYTHONPATH: .
+      BASE_ENVIRONMENT: prod
+    volumes:
+    - '.:/ubuntu:delegated'
+
+  # # Vue frontend
+  # admin:
+  #   build:
+  #     context: ./admin
+  #   ports:
+  #     - "3000:3000"
+  #   container_name: admin-ui
+  #   stdin_open: true
+  #   volumes:
+  #      - ./admin:/admin
+  #      - /admin/node_modules
+
+
+volumes:
+  pgdata:
