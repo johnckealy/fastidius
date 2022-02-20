@@ -23,7 +23,7 @@ def get_app_settings() -> Union[SettingsDev, SettingsProd]:
         environment = 'test'
 
     if environment is None:
-        raise ValueError("The ENVIRONMENT variable has not been set")
+        raise ValueError("The BASE_ENVIRONMENT variable has not been set")
 
     config = environments[environment]
     return config()

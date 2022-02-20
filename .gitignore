@@ -93,3 +93,4 @@ yarn-error.log*
 *.njsproj
 *.sln
 *-flag.d.ts
+app

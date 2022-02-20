@@ -1,9 +1,19 @@
-import uvicorn
 import typer
-from typing import Optional
+import shutil
+import os
+import subprocess
+import sys
 from mako.template import Template
 
+
 app = typer.Typer()
+
+
+
+def generate_file(filename, **kwargs):
+    routes_base = Template(filename=filename).render(**kwargs)
+    with open(filename.replace('/src/', '/app/'), 'w') as file:
+        file.write(routes_base)
 
 
 @app.command(help='Create a brand new web application.')
@@ -32,33 +42,26 @@ def create():
     models = [model.strip().capitalize() for model in models.split(',')]
 
 
-    # Dependencies
-    requirements = Template(filename='./src/templates/requirements.txt.mako').render()
-    with open('app/requirements.txt', 'w') as file:
-        file.write(requirements)
 
-    # User auth model
-    main = Template(filename='./src/templates/main.py.mako').render(user_model=user_model)
-    with open('app/main.py', 'w') as file:
-        file.write(main)
+    path = os.path.dirname(os.path.abspath(__file__))
+    shutil.copytree(f'{path}/src', 'app', dirs_exist_ok=True)
 
-    # Base routes, such as the root URI
-    routes_base = Template(filename='./src/templates/routes_base.py.mako').render()
-    with open('app/routes/base.py', 'w') as file:
-        file.write(routes_base)
+    generate_file(f'app/backend/main.py', alembic=True)
+
+
 
 
 @app.command(help='Run the newly generated web application using uvicorn.')
 def run():
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    os.chdir('app')
+    if not os.path.isdir('.python3.9_env'):
+        subprocess.run(["virtualenv", ".python3.9_env", "-p", "python3.9"])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "backend/requirements.txt"])
 
+    os.environ["BASE_ENVIRONMENT"] = "dev"
 
+    subprocess.run(["uvicorn", "backend.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"])
 
-@app.command(help='Run the newly generated web application using uvicorn.')
-def swap():
-    routes_base = Template(filename='./src/main.py').render(something='Hello')
-    with open('./main.py', 'w') as file:
-        file.write(routes_base)
 
 
 

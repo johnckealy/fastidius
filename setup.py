@@ -19,6 +19,7 @@ setup(
     url='https://github.com/johnckealy/fastidius',
     py_modules=['cli', 'src'],
     packages=find_packages(),
+    include_package_data=True,
     install_requires=[requirements],
     python_requires='>=3.9',
     classifiers=[
