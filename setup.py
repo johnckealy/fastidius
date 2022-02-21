@@ -19,6 +19,10 @@ setup(
     url='https://github.com/johnckealy/fastidius',
     py_modules=['cli', 'src'],
     packages=find_packages(),
+    package_data={
+        '': ['src/docker-compose.yml'],
+        '': ['src/README.md'],
+    },
     include_package_data=True,
     install_requires=[requirements],
     python_requires='>=3.9',
