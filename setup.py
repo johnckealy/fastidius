@@ -1,5 +1,5 @@
+import os
 from setuptools import setup, find_packages
-
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -9,7 +9,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name='fastidius',
-    version='0.0.6',
+    version=os.getenv('FASTIDIUS_VERSION'),
     author='John Kealy',
     author_email='johnckealy.dev@gmail.com',
     license='MIT',
@@ -17,11 +17,9 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/johnckealy/fastidius',
-    py_modules=['cli', 'src'],
+    py_modules=['fastidius_cli', 'fastidius'],
     packages=find_packages(),
     package_data={
-        '': ['src/docker-compose.yml'],
-        '': ['src/README.md'],
     },
     include_package_data=True,
     install_requires=[requirements],
@@ -32,6 +30,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        fastidius=cli:app
+        fastidius=fastidius_cli:app
     '''
 )

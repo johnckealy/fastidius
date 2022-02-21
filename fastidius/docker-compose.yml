@@ -40,17 +40,17 @@ services:
     volumes:
     - '.:/ubuntu:delegated'
 
-  # # Vue frontend
-  # admin:
-  #   build:
-  #     context: ./admin
-  #   ports:
-  #     - "3000:3000"
-  #   container_name: admin-ui
-  #   stdin_open: true
-  #   volumes:
-  #      - ./admin:/admin
-  #      - /admin/node_modules
+  # Vue frontend
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    container_name: frontend
+    stdin_open: true
+    volumes:
+       - ./frontend:/frontend
+       - /frontend/node_modules
 
 
 volumes:

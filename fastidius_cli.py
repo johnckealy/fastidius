@@ -4,10 +4,23 @@ import os
 import subprocess
 import sys
 from mako.template import Template
-
+from fastidius import __version__
 
 app = typer.Typer()
 
+
+
+def version_callback(value: bool):
+    """Faciliates printing the --version."""
+    if value:
+        typer.echo(f"Fastidius {__version__}")
+        raise typer.Exit()
+
+
+@app.callback()
+def common(ctx: typer.Context, version: bool = typer.Option(None, "--version", callback=version_callback)):
+    """Faciliates printing the --version."""
+    pass
 
 
 def generate_file(filename, **kwargs):
@@ -44,7 +57,7 @@ def create():
 
 
     path = os.path.dirname(os.path.abspath(__file__))
-    shutil.copytree(f'{path}/src', 'app', dirs_exist_ok=True)
+    shutil.copytree(f'{path}/fastidius', 'app', dirs_exist_ok=True)
 
     generate_file(f'app/backend/main.py', alembic=True)
 
@@ -61,7 +74,6 @@ def run():
     os.environ["BASE_ENVIRONMENT"] = "dev"
 
     subprocess.run(["uvicorn", "backend.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"])
-
 
 
 
