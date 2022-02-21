@@ -10,6 +10,7 @@ dist
 build
 
 .vscode/
+!fastidius/.vscode/launch.json
 # python
 *.pyc
 __pycache__
