@@ -1,6 +1,4 @@
 include LICENSE
-include fastidius/docker-compose.yml
-include fastidius/README.md
-recursive-include fastidius/backend/ *
-recursive-include fastidius/frontend/ *
-prune fastidius/frontend/node_modules/
+recursive-include fastidius/app_template/ *
+recursive-include fastidius/deploy/ *
+prune fastidius/app_template/frontend/node_modules/

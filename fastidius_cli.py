@@ -25,7 +25,7 @@ def common(ctx: typer.Context, version: bool = typer.Option(None, "--version", c
 
 def generate_file(filename, app_name, **kwargs):
     routes_base = Template(filename=filename).render(**kwargs)
-    with open(filename.replace('/src/', f'/{app_name}/'), 'w') as file:
+    with open(filename, 'w') as file:
         file.write(routes_base)
 
 
@@ -57,23 +57,23 @@ def create():
 
 
     path = os.path.dirname(os.path.abspath(__file__))
-    shutil.copytree(f'{path}/fastidius', app_name, dirs_exist_ok=True)
+    shutil.copytree(f'{path}/fastidius/app_template', app_name, dirs_exist_ok=True)
 
     generate_file(f'{app_name}/backend/main.py', app_name=app_name, alembic=True)
 
 
 
 
-# @cli.command(help='Run the newly generated web application using uvicorn.')
-# def run():
-#     os.chdir('app')
-#     if not os.path.isdir('.python3.9_env'):
-#         subprocess.run(["virtualenv", ".python3.9_env", "-p", "python3.9"])
-#         subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "backend/requirements.txt"])
+@cli.command(help='Run the newly generated web application using uvicorn.')
+def run():
+    os.chdir('app')
+    if not os.path.isdir('.python3.9_env'):
+        subprocess.run(["virtualenv", ".python3.9_env", "-p", "python3.9"])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "backend/requirements.txt"])
 
-#     os.environ["BASE_ENVIRONMENT"] = "dev"
+    os.environ["BASE_ENVIRONMENT"] = "dev"
 
-#     subprocess.run(["uvicorn", "backend.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"])
+    subprocess.run(["uvicorn", "backend.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"])
 
 
 
