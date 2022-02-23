@@ -6,7 +6,7 @@ import sys
 from mako.template import Template
 from fastidius import __version__
 
-app = typer.Typer()
+cli = typer.Typer()
 
 
 
@@ -17,19 +17,19 @@ def version_callback(value: bool):
         raise typer.Exit()
 
 
-@app.callback()
+@cli.callback()
 def common(ctx: typer.Context, version: bool = typer.Option(None, "--version", callback=version_callback)):
     """Faciliates printing the --version."""
     pass
 
 
-def generate_file(filename, **kwargs):
+def generate_file(filename, app_name, **kwargs):
     routes_base = Template(filename=filename).render(**kwargs)
-    with open(filename.replace('/src/', '/app/'), 'w') as file:
+    with open(filename.replace('/src/', f'/{app_name}/'), 'w') as file:
         file.write(routes_base)
 
 
-@app.command(help='Create a brand new web application.')
+@cli.command(help='Create a brand new web application.')
 def create():
     typer.echo(
         """
@@ -47,6 +47,7 @@ def create():
         typer.style("fastidius needs a few settings before generating your app.\n ", fg=typer.colors.GREEN, bold=True)
     )
 
+    app_name = typer.prompt("Please give your app a name: ", default='app')
     auth = typer.confirm("Add authentication?", default=True)
     if auth:
         user_model = typer.prompt("Please specify the name of your User model", default='User')
@@ -55,27 +56,26 @@ def create():
     models = [model.strip().capitalize() for model in models.split(',')]
 
 
-
     path = os.path.dirname(os.path.abspath(__file__))
-    shutil.copytree(f'{path}/fastidius', 'app', dirs_exist_ok=True)
+    shutil.copytree(f'{path}/fastidius', app_name, dirs_exist_ok=True)
 
-    generate_file(f'app/backend/main.py', alembic=True)
-
-
+    generate_file(f'{app_name}/backend/main.py', app_name=app_name, alembic=True)
 
 
-@app.command(help='Run the newly generated web application using uvicorn.')
-def run():
-    os.chdir('app')
-    if not os.path.isdir('.python3.9_env'):
-        subprocess.run(["virtualenv", ".python3.9_env", "-p", "python3.9"])
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "backend/requirements.txt"])
 
-    os.environ["BASE_ENVIRONMENT"] = "dev"
 
-    subprocess.run(["uvicorn", "backend.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"])
+# @cli.command(help='Run the newly generated web application using uvicorn.')
+# def run():
+#     os.chdir('app')
+#     if not os.path.isdir('.python3.9_env'):
+#         subprocess.run(["virtualenv", ".python3.9_env", "-p", "python3.9"])
+#         subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "backend/requirements.txt"])
+
+#     os.environ["BASE_ENVIRONMENT"] = "dev"
+
+#     subprocess.run(["uvicorn", "backend.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"])
 
 
 
 if __name__ == "__main__":
-    app()
+    cli()

@@ -30,6 +30,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        fastidius=fastidius_cli:app
+        fastidius=fastidius_cli:cli
     '''
 )
