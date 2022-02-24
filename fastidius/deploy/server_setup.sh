@@ -70,7 +70,7 @@ usermod -aG docker ${USERNAME}
 echo '
 alias gst="git status"
 alias gl="git log"
-
+alias dc="docker-compose"
 alias venv="source ${PWD}/.*/bin/activate"
 
 # Handy function to enter a virtual env by typing "venv"

@@ -1,5 +1,4 @@
-from distutils.log import warn
-from ipaddress import ip_address
+from click import echo
 import typer
 import shutil
 import os
@@ -8,7 +7,8 @@ import sys
 from mako.template import Template
 from fastidius import __version__
 from fabric import Connection
-from fabric.transfer import Transfer
+from invoke.exceptions import UnexpectedExit
+
 
 cli = typer.Typer()
 FILEPATH = f'{os.path.dirname(os.path.abspath(__file__))}/fastidius'
@@ -27,12 +27,29 @@ def common(ctx: typer.Context, version: bool = typer.Option(None, "--version", c
     pass
 
 
+def colored_echo(message, color='blue'):
+    COLORS = {
+        'blue': typer.colors.BRIGHT_BLUE
+    }
+    typer.echo(typer.style(message, fg=COLORS[color]))
+
+
 def generate_file(filename, outfile=None, **kwargs):
     routes_base = Template(filename=filename).render(**kwargs)
     if not outfile:
         outfile = filename
     with open(outfile, 'w') as file:
         file.write(routes_base)
+
+
+def connect_to_server(ip_address: str, root=False):
+    host = 'root' if root else 'ubuntu'
+    return Connection(
+        host=f'{host}@{ip_address}',
+        connect_kwargs={
+            "key_filename": f"{os.getenv('HOME')}/.ssh/id_ed25519.pub",
+        }
+    )
 
 
 @cli.command(help='Create a brand new web application.')
@@ -68,30 +85,27 @@ def create():
 
 
 @cli.command(help='Experimental command. Connect to a remote server and run a basic setup script on it.')
-def initialize_server(ip_address=ip_address):
+def initialize_server(ip_address: str, use_fabric=None):
     """
-    Experimental command. This will need to be done so seldom, its probably going
-    to be better to just run:
-    ssh root@<ip address> "bash -s" < ./fastidius/deploy/server_setup.sh
+    Experimental command. The main logic is still buggy so not in use, so the command just print the required shell command.
     """
-    conn = Connection(
-        host=f'root@{ip_address}',
-        connect_kwargs={"key_filename": f"{os.getenv('HOME')}/.ssh/id_ed25519.pub"}
-    )
-    with open(f'{FILEPATH}/deploy/server_setup.sh', 'r') as script:
-        conn.run(script.read(), warn=True)
+    if use_fabric:
+        conn = connect_to_server(root=True)
+        with open(f'{FILEPATH}/deploy/server_setup.sh', 'r') as script:
+            conn.run(script.read(), warn=True)
+    else:
+        typer.echo('Run this command to set up a new Droplet.')
+        typer.echo(
+            typer.style(f'\n\nssh root@{ip_address} "bash -s" < {FILEPATH}/deploy/server_setup.sh\n', fg=typer.colors.BRIGHT_BLUE)
+        )
 
 
 @cli.command(help='Generate a new Caddyfile and docker setup for caddy.')
-def configure_caddy(ip_address=ip_address):
-    conn = Connection(
-        host=f'ubuntu@{ip_address}',
-        connect_kwargs={"key_filename": f"{os.getenv('HOME')}/.ssh/id_ed25519.pub"}
-    )
-    transfer = Transfer(conn)
+def configure_caddy(ip_address: str = typer.Option(...)):
+    conn = connect_to_server(ip_address=ip_address)
 
     try:
-        file = transfer.get('/caddy/Caddyfile', local=f'{FILEPATH}/deploy/', preserve_mode=False)
+        conn.get('/caddy/Caddyfile', local=f'{FILEPATH}/deploy/', preserve_mode=False)
     except FileNotFoundError:
         typer.echo("No Caddyfile was found in /caddy, creating one...")
         generate_file(
@@ -105,11 +119,22 @@ def configure_caddy(ip_address=ip_address):
 
 
 
-
 @cli.command(help='')
-def deploy_caddy(ip_address=ip_address):
-    #TODO
-    pass
+def deploy_caddy(ip_address: str = typer.Option(...)):
+    conn = connect_to_server(ip_address=ip_address, root=True)
+    try:
+        conn.run('ls /caddy/', hide='both')
+    except UnexpectedExit:
+        conn.run('mkdir /caddy/')
+
+    colored_echo(f"\n[WARNING] This action will overwrite /caddy/Caddyfile on the server with the "
+                  "local version and send up the docker container.\n")
+    confirm = typer.confirm(f"\nAre you happy with the contents of {FILEPATH}/deploy/Caddyfile? \n")
+    if confirm:
+        conn.put( f'{FILEPATH}/deploy/Caddyfile', remote="/caddy/Caddyfile",  preserve_mode=False)
+        conn.put( f'{FILEPATH}/deploy/docker-compose.yml', remote="/caddy/docker-compose.yml",  preserve_mode=False)
+        conn.run('cd /caddy/ && docker-compose up --build -d', echo=True)
+
 
 
 
