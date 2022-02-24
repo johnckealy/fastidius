@@ -8,10 +8,32 @@ from mako.template import Template
 from fastidius import __version__
 from fabric import Connection
 from invoke.exceptions import UnexpectedExit
+import requests
+import json
 
 
 cli = typer.Typer()
 FILEPATH = f'{os.path.dirname(os.path.abspath(__file__))}/fastidius'
+
+IP_ADDRESS = os.getenv('IP_ADDRESS')
+
+
+class Github:
+
+    def __init__(self, username, token, repo) -> None:
+        self.username = username
+        self.token = token
+        self.repo = repo
+        self.headers = {
+            "Accept": "application/vnd.github.v3+json"
+        }
+
+    def send(self):
+        secrets = requests.get(f'https://api.github.com/repos/{self.username}/{self.repo}/actions/secrets', auth=(self.username, self.token))
+
+        json.loads(secrets.content)
+        # TODO: finish feature for upload variables to github secrets
+
 
 
 def version_callback(value: bool):
@@ -19,12 +41,6 @@ def version_callback(value: bool):
     if value:
         typer.echo(f"Fastidius {__version__}")
         raise typer.Exit()
-
-
-@cli.callback()
-def common(ctx: typer.Context, version: bool = typer.Option(None, "--version", callback=version_callback)):
-    """Faciliates printing the --version."""
-    pass
 
 
 def colored_echo(message, color='blue'):
@@ -42,14 +58,26 @@ def generate_file(filename, outfile=None, **kwargs):
         file.write(routes_base)
 
 
-def connect_to_server(ip_address: str, root=False):
-    host = 'root' if root else 'ubuntu'
+def connect_to_server(ip_address: str = IP_ADDRESS, root = False):
+    if ip_address:
+        host = 'root' if root else 'ubuntu'
+    else:
+        typer.echo("No server IP address was supplied, please include one using either --ip-address <IP ADDRESS>, "
+                   "or by setting the IP_ADDRESS environment variable using an export statement.")
+        return None
     return Connection(
         host=f'{host}@{ip_address}',
         connect_kwargs={
             "key_filename": f"{os.getenv('HOME')}/.ssh/id_ed25519.pub",
         }
     )
+
+
+@cli.callback()
+def common(ctx: typer.Context, version: bool = typer.Option(None, "--version", callback=version_callback)):
+    """Facilitates printing the --version."""
+    pass
+
 
 
 @cli.command(help='Create a brand new web application.')
@@ -101,9 +129,8 @@ def initialize_server(ip_address: str, use_fabric=None):
 
 
 @cli.command(help='Generate a new Caddyfile and docker setup for caddy.')
-def configure_caddy(ip_address: str = typer.Option(...)):
+def configure_caddy(ip_address: str = typer.Option(IP_ADDRESS)):
     conn = connect_to_server(ip_address=ip_address)
-
     try:
         conn.get('/caddy/Caddyfile', local=f'{FILEPATH}/deploy/', preserve_mode=False)
     except FileNotFoundError:
@@ -115,13 +142,23 @@ def configure_caddy(ip_address: str = typer.Option(...)):
             ORIGIN_DOMAIN='example.com',
             API_DOMAIN='api.example.com'
         )
-    os.system(f'code {FILEPATH}/deploy/Caddyfile')
+        typer.echo('Generated a new Caddyfile into {FILEPATH}/deploy/Caddyfile')
+    else:
+        typer.echo('Successfully downloaded the Caddyfile from the server.')
+
+    confirm = typer.confirm("Open the Caddyfile in vscode? ")
+    if confirm:
+        os.system(f'code {FILEPATH}/deploy/Caddyfile')
 
 
 
 @cli.command(help='')
-def deploy_caddy(ip_address: str = typer.Option(...)):
+def deploy_caddy(ip_address: str = typer.Option(IP_ADDRESS)):
     conn = connect_to_server(ip_address=ip_address, root=True)
+
+    if not conn:
+        return
+
     try:
         conn.run('ls /caddy/', hide='both')
     except UnexpectedExit:
@@ -138,6 +175,15 @@ def deploy_caddy(ip_address: str = typer.Option(...)):
 
 
 
+@cli.command(help='')
+def deploy(path: str, ip_address: str = typer.Option(IP_ADDRESS)):
+    conn = connect_to_server(ip_address=ip_address)
+
+
+
+
+
+
 @cli.command(help='Run the newly generated web application using uvicorn.')
 def run():
     os.chdir('app')
@@ -150,4 +196,8 @@ def run():
 
 
 if __name__ == "__main__":
-    cli()
+    # cli()
+
+    token = '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'
+    github = Github(username='johnckealy', token=token, repo='johnkealy.com')
+    github.send()
