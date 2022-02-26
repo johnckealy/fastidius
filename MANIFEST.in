@@ -1,4 +1,6 @@
 include LICENSE
+include fastidius/cli.py
 recursive-include fastidius/app_template/ *
 recursive-include fastidius/deploy/ *
+recursive-include fastidius/services/ *
 prune fastidius/app_template/frontend/node_modules/

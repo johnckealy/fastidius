@@ -17,7 +17,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/johnckealy/fastidius',
-    py_modules=['fastidius_cli', 'fastidius'],
+    py_modules=['fastidius'],
     packages=find_packages(),
     package_data={
     },
@@ -30,6 +30,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        fastidius=fastidius_cli:cli
+        fastidius=fastidius.cli:cli
     '''
 )
