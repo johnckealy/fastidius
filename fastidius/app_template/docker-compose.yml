@@ -1,57 +1,68 @@
-version: '3'
+version: '3.5'
+
+# External network
+networks:
+  caddyweb:
+    external: true
+
+% if backend:
+volumes:
+  pgdata:
+% endif
 
 services:
-
+% if backend:
   # PostgreSQL development environment database
-  db:
+  ${app_name}-db:
     image: postgres:12-alpine
     volumes:
-    - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: ubuntu
       POSTGRES_PASSWORD: secrets
       POSTGRES_DB: fasty_test
     ports:
-    - "5433:5432"
+      - "5433:5432"
 
   # Isolated database for unit tests
-  test-db:
+    ${app_name}-test-db:
     image: postgres:12-alpine
     volumes:
-    - /tmp:/tmp
+      - /tmp:/tmp
     environment:
       POSTGRES_USER: ubuntu
       POSTGRES_PASSWORD: secret_test
       POSTGRES_DB: fasty_test
 
   # FastAPI backend
-  backend:
+  ${app_name}-backend:
     build:
       context: ./backend
     depends_on:
-    - db
+      - db
     ports:
-    - "8001:8001"
+      - "8001:8001"
     stop_signal: SIGINT
     command: uvicorn backend.main:app --reload --host 0.0.0.0 --port 8001
     environment:
       PYTHONPATH: .
       BASE_ENVIRONMENT: prod
     volumes:
-    - '.:/ubuntu:delegated'
+      - '.:/ubuntu:delegated'
+    networks:
+      - caddyweb
 
+% endif
   # Vue frontend
-  frontend:
+  ${app_name}-frontend:
     build:
       context: ./frontend
     ports:
       - "3000:3000"
-    container_name: frontend
     stdin_open: true
     volumes:
-       - ./frontend:/frontend
-       - /frontend/node_modules
-
-
-volumes:
-  pgdata:
+      - ./frontend:/var/lib/frontend
+    command:
+      bash -c "cd /frontend && quasar build && quasar serve dist/spa --history --port 3000"
+    networks:
+      - caddyweb

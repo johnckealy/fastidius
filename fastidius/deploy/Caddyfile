@@ -7,6 +7,6 @@
 }
 
 
-api.example.com  {
-    reverse_proxy backend:8001
+website.johnkealy.com  {
+    reverse_proxy website-frontend:3000
 }

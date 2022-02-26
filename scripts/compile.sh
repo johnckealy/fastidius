@@ -3,7 +3,7 @@ set -e
 
 
 # Comment out all the Mako syntax
-for file in $(find fastidius/backend -type f)
+for file in $(find fastidius/app_template/backend -type f)
 do
     # Remove all the comments from the Mako syntax
     sed -i 's/# % if/% if/g' $file

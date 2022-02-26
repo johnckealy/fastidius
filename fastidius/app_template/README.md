@@ -1,1 +1,3 @@
-<img src="https://i.imgur.com/k2OF8XO.png" alt="malcolm" height="120"/>
+<img src="" alt="" height="120"/>
+
+# ${app_name}
