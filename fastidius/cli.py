@@ -1,10 +1,10 @@
 import os
 import sys
 import typer
-import shutil
 import subprocess
 
 from invoke.exceptions import UnexpectedExit
+from fastidius.services.create_app import AppCreator
 from fastidius.services.github import Github
 from fastidius.services.utils import colored_echo, connect_to_server, generate_file, ip_error, version_callback, welcome_prompt
 
@@ -36,29 +36,23 @@ def create():
         if not overwrite:
             raise typer.Abort()
 
-    # Copy the app directory over from the templates.
-    shutil.copytree(f'{FILEPATH}/app_template', app_name, dirs_exist_ok=True)
-
     include_backend = typer.confirm("Include a backend? ", default=False)
-    # auth = typer.confirm("Add authentication?", default=True)
-    # if auth:
-    #     user_model = typer.prompt("Please specify the name of your User model", default='User')
-    #     user_model = user_model.strip().capitalize()
-    # models = typer.prompt("Please specify the names of the initial database models (comma separated)", default='')
-    # models = [model.strip().capitalize() for model in models.split(',')]
 
-
-    generate_file(f'{app_name}/backend/main.py', alembic=True)
-    generate_file(f'{app_name}/docker-compose.yml', include_backend=include_backend, app_name=app_name)
-    generate_file(f'{app_name}/README.md', include_backend=include_backend, app_name=app_name)
-    generate_file(
-        f'{app_name}/.github/workflows/test_and_deploy.yml',
+    creator = AppCreator(
+        FILEPATH=FILEPATH,
+        IP_ADDRESS=IP_ADDRESS,
         app_name=app_name,
-        host='${{ secrets.HOST }}',
-        username='${{ secrets.USERNAME }}',
-        port='${{ secrets.PORT }}',
-        ssh_key='${{ secrets.SSHKEY }}',
     )
+
+    if not include_backend:
+        creator.remove_backend()
+    else:
+        auth = typer.confirm("Add authentication?", default=True)
+        models = typer.prompt("Please specify the names of the initial database models (comma separated)", default='')
+        models = [model.strip().capitalize() for model in models.split(',')]
+
+    creator.generate()
+
     colored_echo(f'App creation was successful. You can now: cd {app_name}/', color='green')
 
 
@@ -68,11 +62,11 @@ def initialize_server(ip_address: str = typer.Option(IP_ADDRESS)):
     """Simple command to print out the necessary shell command to set up a new droplet."""
     if ip_error(ip_address):
         raise typer.Exit(code=1)
-    typer.echo('Run this command to set up a new Droplet.')
-    colored_echo(f'\n\nssh root@{ip_address} "bash -s" < {FILEPATH}/deploy/server_setup.sh\n')
-    typer.echo('If all went well, you should be able to ssh into the server. Do this at least '
-               'once now, because the password newly created sudo user must be set.')
-    colored_echo(f'\nssh ubuntu@{ip_address}')
+    typer.echo('[Run this command locally to set up a new Droplet]')
+    colored_echo(f'ssh root@{ip_address} "bash -s" < {FILEPATH}/deploy/server_setup.sh\n')
+    typer.echo('[If all went well, you should be able to ssh into the server. Do this at least '
+               'once now, because the password for the newly created sudo user must be set]')
+    colored_echo(f'ssh ubuntu@{ip_address}\n')
 
 
 
@@ -87,9 +81,10 @@ def configure_caddy(ip_address: str = typer.Option(IP_ADDRESS)):
         generate_file(
             filename=f'{FILEPATH}/deploy/Caddyfile.mako',
             outfile=f'{FILEPATH}/deploy/Caddyfile',
-            LETSENCRYPT_EMAIL='example@hello.com',
-            ORIGIN_DOMAIN='example.com',
-            API_DOMAIN='api.example.com'
+            letsencrypt_email='example@hello.com',
+            frontend_domain='example.com',
+            backend_domain='api.example.com',
+            app_name='app'
         )
         typer.echo('Generated a new Caddyfile into {FILEPATH}/deploy/Caddyfile')
     else:
@@ -113,12 +108,13 @@ def deploy_caddy(ip_address: str = typer.Option(IP_ADDRESS)):
         conn.run('mkdir /caddy/')
 
     colored_echo(f"\n[WARNING] This action will overwrite /caddy/Caddyfile on the server with the "
-                  "local version and send up the docker container.\n")
-    confirm = typer.confirm(f"\nAre you happy with the contents of {FILEPATH}/deploy/Caddyfile? \n")
+                  "local version and send up the docker container.")
+    confirm = typer.confirm(f"Are you happy with the contents of {FILEPATH}/deploy/Caddyfile? ")
     if confirm:
         conn.put( f'{FILEPATH}/deploy/Caddyfile', remote="/caddy/Caddyfile",  preserve_mode=False)
         conn.put( f'{FILEPATH}/deploy/docker-compose.yml', remote="/caddy/docker-compose.yml",  preserve_mode=False)
-        conn.run('cd /caddy/ && docker-compose up --build -d', echo=True)
+        typer.echo('Files uploaded. Sending up the Caddy container...')
+        conn.run('cd /caddy/ && docker-compose down -v && docker-compose up --build -d', echo=True)
 
 
 
@@ -133,16 +129,12 @@ def github_setup(
     if not github_token or not github_username:
         raise ValueError('No github username/token found. Please set either the --github-token ' +
                          'and --github-username flags, or the GITHUB_TOKEN and GITHUB_USERNAME shell variables.')
-
     if not github_repo:
         github_repo = os.path.basename(os.getcwd())
 
     github = Github(username=github_username, token=github_token, repo=github_repo)
-
     conn = connect_to_server(ip_address)
-
     SECRETS = github.secrets_dict(conn, ip_address)
-
     for secret_name, secret_value in SECRETS.items():
         response_code = github.upload_secret(secret_name=secret_name, secret_value=secret_value)
         if response_code == 204:
@@ -154,6 +146,8 @@ def github_setup(
 @cli.command(help='')
 def deploy(path: str, ip_address: str = typer.Option(IP_ADDRESS)):
     conn = connect_to_server(ip_address)
+    if not conn:
+        raise typer.Exit('There was an issue connecting to the server.', code=1)
 
 
 

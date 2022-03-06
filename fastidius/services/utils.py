@@ -5,7 +5,6 @@ from typing import Union
 from mako.template import Template
 from fastidius import __version__
 
-
 def version_callback(value: bool):
     """Faciliates printing the --version."""
     if value:

@@ -6,7 +6,6 @@
     local_certs
 }
 
-
-website.johnkealy.com  {
-    reverse_proxy website-frontend:3000
+website.johnkealy.com {
+    reverse_proxy whatever-frontend:3000
 }

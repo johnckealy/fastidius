@@ -1,15 +1,13 @@
-
-
 {
-    email ${LETSENCRYPT_EMAIL}
+    email ${letsencrypt_email}
     acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
     local_certs
 }
 
-${ORIGIN_DOMAIN} {
-    reverse_proxy frontend:3000
+${frontend_domain} {
+    reverse_proxy ${app_name}-frontend:3000
 }
 
-${API_DOMAIN}  {
-    reverse_proxy backend:8001
+${backend_domain}  {
+    reverse_proxy ${app_name}-backend:8001
 }

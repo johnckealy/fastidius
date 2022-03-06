@@ -1,6 +1,0 @@
-dist
-__pycache__/
-node_modules/
-.quasar/
-src-ssr/
-.vscode/

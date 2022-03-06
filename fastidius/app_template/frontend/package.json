@@ -1,16 +1,18 @@
 {
-  "name": "frontend",
+  "name": "${ app_name }",
   "version": "0.0.1",
-  "description": "Fastly template",
-  "productName": "Fastly",
-  "author": "John C. Kealy",
+  "description": "${ app_name }",
+  "productName": "${ app_name }",
+  "author": "",
   "private": true,
   "scripts": {
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    % if include_backend:
     "axios": "^0.21.1",
+    % endif
     "core-js": "^3.6.5",
     "quasar": "^2.0.0",
     "vue": "^3.0.0",
