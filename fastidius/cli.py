@@ -37,20 +37,27 @@ def create():
             raise typer.Abort()
 
     include_backend = typer.confirm("Include a backend? ", default=False)
+    if include_backend:
+        auth = typer.confirm("Add authentication?", default=True)
+        if auth:
+            models = typer.prompt("Please specify the names of the initial database models (comma separated)", default='')
+            models = [model.strip().capitalize() for model in models.split(',')]
+    else:
+        auth = False
+        models = []
 
     creator = AppCreator(
         FILEPATH=FILEPATH,
-        IP_ADDRESS=IP_ADDRESS,
+        include_backend=include_backend,
         app_name=app_name,
+        auth=auth,
+        models=models,
     )
 
     if not include_backend:
         creator.remove_backend()
-    else:
-        auth = typer.confirm("Add authentication?", default=True)
-        models = typer.prompt("Please specify the names of the initial database models (comma separated)", default='')
-        models = [model.strip().capitalize() for model in models.split(',')]
 
+    typer.echo('Creating application...')
     creator.generate()
 
     colored_echo(f'App creation was successful. You can now: cd {app_name}/', color='green')

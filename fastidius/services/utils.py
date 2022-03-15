@@ -59,7 +59,6 @@ def ip_error(ip_address: str) -> bool:
     return False
 
 
-
 def connect_to_server(ip_address: str, root: bool = False) -> Union[Connection, None]:
     if ip_error(ip_address):
         raise typer.Exit()

@@ -1,6 +1,10 @@
 uvicorn
-fastapi
+fastapi<0.75.0
 pylint
 pytest
+% if auth:
 fastapi-users[sqlalchemy2]
+% endif
+% if include_backend:
 asyncpg
+% endif

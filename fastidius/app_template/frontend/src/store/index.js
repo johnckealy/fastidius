@@ -1,11 +1,14 @@
 import { reactive } from 'vue';
 
 const state = reactive({
+  % if auth:
   user: null,
   prompt: true
+  % endif
 })
 
 const methods = {
+  % if auth:
   toggleLoginDialog() {
     state.prompt = !state.prompt;
   },
@@ -17,6 +20,7 @@ const methods = {
       return state.user.email
     }
   }
+  % endif
 }
 
 export default {

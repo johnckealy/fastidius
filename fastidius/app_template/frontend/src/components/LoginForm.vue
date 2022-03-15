@@ -85,14 +85,14 @@ export default {
           $q.notify({
             color: "green-4",
             textColor: "white",
-            icon: "cloud_done",
+            icon: "mdi-check-circle",
             message: "Submitted",
           });
         } catch (e) {
           $q.notify({
             color: "red-5",
             textColor: "white",
-            icon: "warning",
+            icon: "mdi-alert",
             message: "Oops! Something went wrong logging you in",
           });
         }

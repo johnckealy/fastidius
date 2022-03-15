@@ -21,6 +21,7 @@ __pycache__
 .mypy_cache
 .python3.9_env/
 .python_env/
+.fastidius_env/
 
 # javascript
 node_modules
