@@ -6,9 +6,9 @@ from fastapi_users.authentication import (AuthenticationBackend, CookieTransport
 
 from fastapi_users.db import SQLAlchemyUserDatabase
 
-from backend.db import get_user_db
-from backend.models.user import User, UserCreate, UserDB, UserUpdate
-from backend.core.settings.config import settings
+from db import get_user_db
+from models.user import User, UserCreate, UserDB, UserUpdate
+from core.settings.config import settings
 
 
 class UserManager(BaseUserManager[UserCreate, UserDB]):

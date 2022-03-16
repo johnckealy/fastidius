@@ -5,13 +5,13 @@ networks:
   caddyweb:
     external: true
 
-% if backend:
+% if include_backend:
 volumes:
   pgdata:
 % endif
 
 services:
-% if backend:
+% if include_backend:
   # PostgreSQL development environment database
   ${app_name}-db:
     image: postgres:12-alpine

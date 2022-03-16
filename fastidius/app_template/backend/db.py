@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from backend.models.user import UserDB
-from backend.core.settings.config import settings
+from models.user import UserDB
+from core.settings.config import settings
 
 Base: DeclarativeMeta = declarative_base()
 

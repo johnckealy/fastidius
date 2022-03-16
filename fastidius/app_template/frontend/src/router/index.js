@@ -26,5 +26,20 @@ export default route(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.MODE === 'ssr' ? void 0 : process.env.VUE_ROUTER_BASE)
   })
 
+
+  // Router.beforeEach(async (to, from) => {
+
+  //   // localStorage.isAuthenticated = false
+
+  //   const isAuthenticated = localStorage.isAuthenticated;
+  //   if (
+  //     isAuthenticated !== 'true' &&
+  //     to.meta.requiresAuth &&
+  //     to.path !== '/login'
+  //   ) {
+  //     return '/login'
+  //   }
+  // })
+
   return Router
 })
