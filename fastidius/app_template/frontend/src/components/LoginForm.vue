@@ -82,6 +82,7 @@ export default {
           getUser();
 
           store.methods.toggleLoginDialog();
+          localStorage.isAuthenticated = true
           $q.notify({
             color: "green-4",
             textColor: "white",

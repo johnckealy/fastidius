@@ -3,7 +3,7 @@ import { reactive } from 'vue';
 const state = reactive({
   % if auth:
   user: null,
-  prompt: true
+  prompt: false
   % endif
 })
 
@@ -14,6 +14,17 @@ const methods = {
   },
   setUser(user) {
     state.user = user;
+  },
+  async verifyUser(api) {
+    try {
+      const response = await api.get("/users/me");
+      if (response.status_code == 200) {
+        debugger
+      }
+    }
+    catch {
+      localStorage.isAuthenticated = false
+    }
   },
   getDisplayName() {
     if (state.user) {
