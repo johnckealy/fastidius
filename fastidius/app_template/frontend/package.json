@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
-    % if include_backend:
+    % if backend:
     "axios": "^0.21.1",
     % endif
     "core-js": "^3.6.5",

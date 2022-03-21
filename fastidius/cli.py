@@ -36,8 +36,8 @@ def create():
         if not overwrite:
             raise typer.Abort()
 
-    include_backend = typer.confirm("Include a backend? ", default=False)
-    if include_backend:
+    backend = typer.confirm("Include a backend? ", default=True)
+    if backend:
         auth = typer.confirm("Add authentication?", default=True)
         if auth:
             models = typer.prompt("Please specify the names of the initial database models (comma separated)", default='')
@@ -48,19 +48,19 @@ def create():
 
     creator = AppCreator(
         FILEPATH=FILEPATH,
-        include_backend=include_backend,
+        backend=backend,
         app_name=app_name,
         auth=auth,
         models=models,
     )
 
-    if not include_backend:
+    if not backend:
         creator.remove_backend()
 
     typer.echo('Creating application...')
     creator.generate()
 
-    colored_echo(f'App creation was successful. You can now: cd {app_name}/', color='green')
+    # colored_echo(f'App creation was successful. You can now: cd {app_name}/', color='green')
 
 
 

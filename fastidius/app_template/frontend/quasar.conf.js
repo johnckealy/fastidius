@@ -20,7 +20,7 @@ module.exports = configure(function (ctx) {
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/boot-files
     boot: [
-      % if include_backend:
+      % if backend:
       'axios'
       % endif
     ],

@@ -2,9 +2,9 @@ from fastapi import Depends, FastAPI
 from typing import List, Any
 from fastapi.middleware.cors import CORSMiddleware
 
-from db import create_db_and_tables
-from core.auth import auth_backend, fastapi_users
-from api.endpoints.user_endpoints import router as user_routes
+from backend.db import create_db_and_tables
+from backend.core.auth import auth_backend, fastapi_users
+from backend.api.endpoints.user_endpoints import router as user_routes
 
 app = FastAPI()
 

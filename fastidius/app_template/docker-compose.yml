@@ -5,13 +5,13 @@ networks:
   caddyweb:
     external: true
 
-% if include_backend:
+% if backend:
 volumes:
   pgdata:
 % endif
 
 services:
-% if include_backend:
+% if backend:
   # PostgreSQL development environment database
   ${app_name}-db:
     image: postgres:12-alpine
@@ -25,7 +25,7 @@ services:
       - "5433:5432"
 
   # Isolated database for unit tests
-    ${app_name}-test-db:
+  ${app_name}-test-db:
     image: postgres:12-alpine
     volumes:
       - /tmp:/tmp

@@ -4,6 +4,7 @@ __pycache__
 .pytest_cache
 __pycache__/
 .python_env/
+.fast_env/
 
 fastidius.egg-info/
 dist

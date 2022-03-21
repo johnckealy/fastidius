@@ -5,6 +5,6 @@ pytest
 % if auth:
 fastapi-users[sqlalchemy2]
 % endif
-% if include_backend:
+% if backend:
 asyncpg
 % endif
