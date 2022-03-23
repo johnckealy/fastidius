@@ -14,22 +14,29 @@ const methods = {
   },
   setUser(user) {
     state.user = user;
+    localStorage.authenticatedUser = JSON.stringify(user)
   },
   async verifyUser(api) {
     try {
       const response = await api.get("/users/me");
-      if (response.status_code == 200) {
-        debugger
+      if (response.status == 200) {
+        state.user = response.data;
+        localStorage.authenticatedUser = JSON.stringify(state.user)
       }
     }
     catch {
-      localStorage.isAuthenticated = false
+      localStorage.authenticatedUser = null
     }
   },
   getDisplayName() {
     if (state.user) {
       return state.user.email
     }
+  },
+  async onLogout(api) {
+    await api.post("/auth/jwt/logout");
+    localStorage.authenticatedUser = null
+    state.user = null
   }
   % endif
 }

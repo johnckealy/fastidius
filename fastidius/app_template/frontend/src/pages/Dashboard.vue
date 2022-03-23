@@ -5,17 +5,13 @@
 </template>
 
 <script>
-import { onMounted, inject } from "vue";
+import { inject } from "vue";
 
 export default {
   name: "DashBoard",
   setup() {
     const store = inject("store");
     const api = inject("api");
-
-    onMounted(() => {
-      store.methods.verifyUser(api);
-    });
   },
 };
 </script>

@@ -38,6 +38,7 @@ class AppCreator:
         generate_file(f'{self.app_name}/frontend/package.json', app_name=self.app_name, backend=self.backend)
         generate_file(f'{self.app_name}/frontend/src/layouts/MainLayout.vue', app_name=self.app_name, auth=self.auth)
         generate_file(f'{self.app_name}/frontend/src/pages/Index.vue', app_name=self.app_name, auth=self.auth)
+        generate_file(f'{self.app_name}/frontend/src/pages/Dashboard.vue', auth=self.auth)
         generate_file(f'{self.app_name}/frontend/src/store/index.js', auth=self.auth)
 
     def generate_backend(self):

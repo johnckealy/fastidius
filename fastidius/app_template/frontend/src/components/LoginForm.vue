@@ -10,6 +10,7 @@
             type="text"
             label="Email *"
             lazy-rules
+            no-error-icon
             :rules="[
               (val) => (val && val.length > 0) || 'Please type something',
             ]"
@@ -17,6 +18,7 @@
 
           <q-input
             filled
+            no-error-icon
             v-model="password"
             label="Password *"
             lazy-rules
@@ -24,6 +26,8 @@
               (val) => (val && val.length > 0) || 'Please type something',
             ]"
           />
+
+          <p class="q-ma-lg">No Account? Register <router-link to="/register">here</router-link></p>
 
           <div>
             <q-btn label="Submit" type="submit" color="primary" />
@@ -44,11 +48,14 @@
 <script>
 import { useQuasar } from "quasar";
 import { ref, inject } from "vue";
+import { useRouter, useRoute } from "vue-router";
 
 export default {
   setup() {
     const store = inject("store");
     const api = inject("api");
+    const route = useRoute();
+    const router = useRouter();
 
     const $q = useQuasar();
     const email = ref(null);
@@ -57,7 +64,7 @@ export default {
     const getUser = async () => {
       try {
         const response = await api.get("/users/me");
-        store.methods.setUser(response.data)
+        store.methods.setUser(response.data);
       } catch {
         console.log("Error: Issue getting the current user");
       }
@@ -70,6 +77,7 @@ export default {
 
       async onSubmit() {
         const formData = new FormData();
+
         formData.set("username", email.value);
         formData.set("password", password.value);
         try {
@@ -79,10 +87,15 @@ export default {
             },
           });
 
-          getUser();
+          await getUser();
 
-          store.methods.toggleLoginDialog();
-          localStorage.isAuthenticated = true
+          store.state.prompt = false;
+
+          if (route.fullPath === "/login") {
+            router.push({ path: "/dashboard" });
+          }
+
+
           $q.notify({
             color: "green-4",
             textColor: "white",
