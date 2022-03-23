@@ -1,19 +1,25 @@
 from typing import AsyncGenerator
 
+% if auth:
 from fastapi import Depends
 from fastapi_users.db import SQLAlchemyBaseUserTable, SQLAlchemyUserDatabase
+% endif
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
 from sqlalchemy.orm import sessionmaker
 
+% if auth:
 from backend.models.user import UserDB
+% endif
 from backend.core.settings.config import settings
 
 Base: DeclarativeMeta = declarative_base()
 
 
+% if auth:
 class UserTable(Base, SQLAlchemyBaseUserTable):
     pass
+% endif
 
 
 engine = create_async_engine(settings.DATABASE_URL)
@@ -30,5 +36,7 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
+% if auth:
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
     yield SQLAlchemyUserDatabase(UserDB, session, UserTable)
+% endif

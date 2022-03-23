@@ -81,8 +81,8 @@ export default defineComponent({
 
     onMounted(() => {
       if (store.state.user || localStorage.authenticatedUser) store.methods.verifyUser(api);
-    % endif
     });
+    % endif
 
     return {
       % if auth:

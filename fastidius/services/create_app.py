@@ -40,11 +40,25 @@ class AppCreator:
         generate_file(f'{self.app_name}/frontend/src/pages/Index.vue', app_name=self.app_name, auth=self.auth)
         generate_file(f'{self.app_name}/frontend/src/pages/Dashboard.vue', auth=self.auth)
         generate_file(f'{self.app_name}/frontend/src/store/index.js', auth=self.auth)
+        generate_file(f'{self.app_name}/frontend/src/router/routes.js', auth=self.auth)
+        generate_file(f'{self.app_name}/frontend/src/router/index.js', auth=self.auth)
 
     def generate_backend(self):
-        generate_file(f'{self.app_name}/backend/main.py', alembic=True)
+        generate_file(f'{self.app_name}/backend/main.py', auth=self.auth, alembic=True)
+        generate_file(f'{self.app_name}/backend/db.py', auth=self.auth)
+        generate_file(f'{self.app_name}/frontend/src/router/routes.js', auth=self.auth)
+        generate_file(f'{self.app_name}/frontend/src/router/index.js', auth=self.auth)
+        generate_file(f'{self.app_name}/frontend/src/store/index.js', auth=self.auth)
         generate_file(f'{self.app_name}/backend/requirements.txt', app_name=self.app_name, auth=self.auth, backend=self.backend)
 
     def remove_backend(self):
         os.remove(f'{self.app_name}/frontend/src/boot/axios.js')
+
+    def remove_auth(self):
+        os.remove(f'{self.app_name}/backend/models/user.py')
+        os.remove(f'{self.app_name}/backend/core/auth.py')
+        os.remove(f'{self.app_name}/backend/api/endpoints/user_endpoints.py')
         os.remove(f'{self.app_name}/frontend/src/components/LoginForm.vue')
+        os.remove(f'{self.app_name}/frontend/src/pages/Login.vue')
+        os.remove(f'{self.app_name}/frontend/src/pages/Register.vue')
+        os.remove(f'{self.app_name}/frontend/src/pages/RegisteredSuccessfully.vue')

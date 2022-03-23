@@ -39,9 +39,8 @@ def create():
     backend = typer.confirm("Include a backend? ", default=True)
     if backend:
         auth = typer.confirm("Add authentication?", default=True)
-        if auth:
-            models = typer.prompt("Please specify the names of the initial database models (comma separated)", default='')
-            models = [model.strip().capitalize() for model in models.split(',')]
+        models = typer.prompt("Please specify the names of the initial database models (comma separated)", default='')
+        models = [model.strip().capitalize() for model in models.split(',')]
     else:
         auth = False
         models = []
@@ -53,6 +52,9 @@ def create():
         auth=auth,
         models=models,
     )
+
+    if not auth:
+        creator.remove_auth()
 
     if not backend:
         creator.remove_backend()

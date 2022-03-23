@@ -6,5 +6,6 @@ pytest
 fastapi-users[sqlalchemy2]
 % endif
 % if backend:
+sqlalchemy
 asyncpg
 % endif

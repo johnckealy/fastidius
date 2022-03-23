@@ -26,6 +26,7 @@ export default route(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.MODE === 'ssr' ? void 0 : process.env.VUE_ROUTER_BASE)
   })
 
+  % if auth:
   Router.beforeEach(async (to, from) => {
     const authenticatedUser = localStorage.authenticatedUser || 'null';
     if (
@@ -36,6 +37,7 @@ export default route(function (/* { store, ssrContext } */) {
       return '/login'
     }
   })
+  % endif
 
   return Router
 })
