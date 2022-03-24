@@ -2,4 +2,4 @@ from .base import SettingsBase
 
 
 class SettingsDev(SettingsBase):
-    DATABASE_URL: str = "postgresql+asyncpg://jokea:secrets@localhost:5432/fastidius_mould"
+    DATABASE_URL: str = "postgresql+asyncpg://ubuntu:secrets@${app_name}-db:5432/${app_name}_db"

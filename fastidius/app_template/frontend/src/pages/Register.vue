@@ -8,7 +8,7 @@
             <q-input
               filled
               v-model="email"
-              type="text"
+              type="email"
               label="Email *"
               lazy-rules
               no-error-icon
@@ -20,6 +20,7 @@
             <q-input
               filled
               no-error-icon
+              type="password"
               v-model="password"
               label="Password *"
               lazy-rules
@@ -31,6 +32,7 @@
             <q-input
               filled
               no-error-icon
+              type="password"
               v-model="password2"
               label="Re-Type Password *"
               lazy-rules

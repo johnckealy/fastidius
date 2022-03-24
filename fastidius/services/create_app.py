@@ -46,6 +46,9 @@ class AppCreator:
     def generate_backend(self):
         generate_file(f'{self.app_name}/backend/main.py', auth=self.auth, alembic=True)
         generate_file(f'{self.app_name}/backend/db.py', auth=self.auth)
+        generate_file(f'{self.app_name}/backend/core/settings/prod.py', auth=self.app_name)
+        generate_file(f'{self.app_name}/backend/core/settings/dev.py', auth=self.app_name)
+        generate_file(f'{self.app_name}/backend/core/settings/test.py', auth=self.app_name)
         generate_file(f'{self.app_name}/frontend/src/router/routes.js', auth=self.auth)
         generate_file(f'{self.app_name}/frontend/src/router/index.js', auth=self.auth)
         generate_file(f'{self.app_name}/frontend/src/store/index.js', auth=self.auth)
