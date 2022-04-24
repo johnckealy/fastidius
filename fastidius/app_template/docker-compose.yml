@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.9'
 
 # External network
 networks:
@@ -7,35 +7,31 @@ networks:
 
 % if backend:
 volumes:
-  pgdata:
+  mongodb-data:
 % endif
 
 services:
-% if backend:
-  # PostgreSQL development environment database
+  % if backend:
   ${app_name}-db:
-    image: postgres:12-alpine
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: ubuntu
-      POSTGRES_PASSWORD: secrets
-      POSTGRES_DB: ${app_name}_db
+    image: mongo:latest
+    container_name: ${app_name}-db
+    command: mongod --port 27018
     ports:
-      - "5433:5432"
-
-  # Isolated database for unit tests
-  ${app_name}-test-db:
-    image: postgres:12-alpine
+      - 27018:27018
     volumes:
-      - /tmp:/tmp
-    environment:
-      POSTGRES_USER: ubuntu
-      POSTGRES_PASSWORD: secret
-      POSTGRES_DB: ${app_name}_test_db
+      - mongodb-data:/data/${app_name}-db
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: example
+    #   ME_CONFIG_MONGODB_ADMINUSERNAME: root
+    #   ME_CONFIG_MONGODB_ADMINPASSWORD: example
+    #   ME_CONFIG_MONGODB_SERVER: mongo
+    restart: unless-stopped
+    networks:
+      - caddyweb
 
   # FastAPI backend
-  ${app_name}-backend:
+  fuapp-backend:
     build:
       context: ./backend
     depends_on:
@@ -51,10 +47,10 @@ services:
       - '.:/ubuntu:delegated'
     networks:
       - caddyweb
+  % endif
 
-% endif
-  # Vue frontend
-  ${app_name}-frontend:
+  # # Vue frontend
+  fuapp-frontend:
     build:
       context: ./frontend
     ports:
@@ -62,7 +58,6 @@ services:
     stdin_open: true
     volumes:
       - ./frontend:/var/lib/frontend
-    command:
-      bash -c "cd /frontend && quasar build && quasar serve dist/spa --history --port 3000"
+    command: bash -c "cd /frontend && quasar build && quasar serve dist/spa --history --port 3000"
     networks:
       - caddyweb

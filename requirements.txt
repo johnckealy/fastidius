@@ -1,4 +1,5 @@
 uvicorn
+click==8.0.4
 typer
 twine
 setuptools

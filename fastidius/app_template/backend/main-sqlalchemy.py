@@ -1,12 +1,12 @@
 from fastapi import Depends, FastAPI
+from typing import List, Any
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.db import create_db_and_tables
 % if auth:
-from backend.models.user import UserDB
-from backend.core.auth import auth_backend, current_active_user, fastapi_users
+from backend.core.auth import auth_backend, fastapi_users
 from backend.api.endpoints.user_endpoints import router as user_routes
 % endif
-
 
 app = FastAPI()
 
@@ -21,6 +21,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+async def on_startup():
+% if alembic:
+    await create_db_and_tables()
+% else:
+    pass
+% endif
+
+
 
 
 % if auth:
@@ -39,9 +50,5 @@ app.include_router(
     tags=["auth"],
 )
 app.include_router(fastapi_users.get_users_router(), prefix="/users", tags=["users"])
-
-
-@app.get("/authenticated-route")
-async def authenticated_route(user: UserDB = Depends(current_active_user)):
-    return {"message": f"Hello {user.email}!"}
+app.include_router(user_routes)
 % endif

@@ -30,6 +30,9 @@ class AppCreator:
 
         self.generate_frontend()
 
+        # TODO: either implement or remove SQL capability
+        self.remove_sqlalchemy()
+
         if self.backend:
             self.generate_backend()
 
@@ -46,9 +49,9 @@ class AppCreator:
     def generate_backend(self):
         generate_file(f'{self.app_name}/backend/main.py', auth=self.auth, alembic=True)
         generate_file(f'{self.app_name}/backend/db.py', auth=self.auth)
-        generate_file(f'{self.app_name}/backend/core/settings/prod.py', auth=self.app_name)
-        generate_file(f'{self.app_name}/backend/core/settings/dev.py', auth=self.app_name)
-        generate_file(f'{self.app_name}/backend/core/settings/test.py', auth=self.app_name)
+        generate_file(f'{self.app_name}/backend/core/settings/prod.py', app_name=self.app_name)
+        generate_file(f'{self.app_name}/backend/core/settings/dev.py', app_name=self.app_name)
+        generate_file(f'{self.app_name}/backend/core/settings/test.py', app_name=self.app_name)
         generate_file(f'{self.app_name}/frontend/src/router/routes.js', auth=self.auth)
         generate_file(f'{self.app_name}/frontend/src/router/index.js', auth=self.auth)
         generate_file(f'{self.app_name}/frontend/src/store/index.js', auth=self.auth)
@@ -65,3 +68,9 @@ class AppCreator:
         os.remove(f'{self.app_name}/frontend/src/pages/Login.vue')
         os.remove(f'{self.app_name}/frontend/src/pages/Register.vue')
         os.remove(f'{self.app_name}/frontend/src/pages/RegisteredSuccessfully.vue')
+
+
+    def remove_sqlalchemy(self):
+        os.remove(f'{self.app_name}/backend/models/auth-sqlalchemy.py')
+        os.remove(f'{self.app_name}/backend/db-sqlalchemy.py')
+        os.remove(f'{self.app_name}/backend/main-sqlalchemy.py')

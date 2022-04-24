@@ -1,0 +1,72 @@
+version: '3.5'
+
+# External network
+networks:
+  caddyweb:
+    external: true
+
+% if backend:
+volumes:
+  pgdata:
+% endif
+
+services:
+% if backend:
+  # PostgreSQL development environment database
+  ${app_name}-db:
+    image: postgres:12-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ubuntu
+      POSTGRES_PASSWORD: secrets
+      POSTGRES_DB: ${app_name}_db
+    ports:
+      - "5433:5432"
+    networks:
+      - caddyweb
+
+  # Isolated database for unit tests
+  ${app_name}-test-db:
+    image: postgres:12-alpine
+    volumes:
+      - /tmp:/tmp
+    environment:
+      POSTGRES_USER: ubuntu
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: ${app_name}_test_db
+    networks:
+      - caddyweb
+
+  # FastAPI backend
+  ${app_name}-backend:
+    build:
+      context: ./backend
+    depends_on:
+      - ${app_name}-db
+    ports:
+      - "8000:8000"
+    stop_signal: SIGINT
+    command: uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+    environment:
+      PYTHONPATH: .
+      BASE_ENVIRONMENT: prod
+    volumes:
+      - '.:/ubuntu:delegated'
+    networks:
+      - caddyweb
+
+% endif
+  # Vue frontend
+  ${app_name}-frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    volumes:
+      - ./frontend:/var/lib/frontend
+    command:
+      bash -c "cd /frontend && quasar build && quasar serve dist/spa --history --port 3000"
+    networks:
+      - caddyweb
