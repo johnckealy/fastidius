@@ -127,6 +127,7 @@ def deploy_caddy(ip_address: str = typer.Option(IP_ADDRESS)):
 
 
 
+
 @cli.command(help='Set up the Github Action secrets necessary for deployment.')
 def github_setup(
         github_username: str = typer.Option('', envvar='GITHUB_USERNAME'),
@@ -150,24 +151,6 @@ def github_setup(
             typer.echo(f'"{secret_name}" was successfully uploaded to Github secrets.')
 
 
-
-
-@cli.command(help='')
-def deploy(path: str, ip_address: str = typer.Option(IP_ADDRESS)):
-    conn = connect_to_server(ip_address)
-    if not conn:
-        raise typer.Exit('There was an issue connecting to the server.', code=1)
-
-
-
-@cli.command(help='Run the newly generated web application using uvicorn.')
-def run():
-    os.chdir('app')
-    if not os.path.isdir('.python3.9_env'):
-        subprocess.run(["virtualenv", ".python3.9_env", "-p", "python3.9"])
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "backend/requirements.txt"])
-    os.environ["BASE_ENVIRONMENT"] = "dev"
-    subprocess.run(["uvicorn", "backend.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"])
 
 
 

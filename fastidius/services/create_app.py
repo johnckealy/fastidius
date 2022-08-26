@@ -69,8 +69,7 @@ class AppCreator:
         os.remove(f'{self.app_name}/frontend/src/pages/Register.vue')
         os.remove(f'{self.app_name}/frontend/src/pages/RegisteredSuccessfully.vue')
 
-
     def remove_sqlalchemy(self):
-        os.remove(f'{self.app_name}/backend/models/auth-sqlalchemy.py')
+        os.remove(f'{self.app_name}/backend/core/auth-sqlalchemy.py')
         os.remove(f'{self.app_name}/backend/db-sqlalchemy.py')
         os.remove(f'{self.app_name}/backend/main-sqlalchemy.py')

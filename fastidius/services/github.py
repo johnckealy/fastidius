@@ -31,6 +31,12 @@ class Github:
         return response.status_code
 
 
+    def setenv(path):
+        with open(path, 'r') as envfile:
+            env = envfile.read()
+
+
+
     def secrets_dict(self, conn: Connection, ip_address: str) -> dict:
         """Returns a structured dictionary that with fields ready to upload to Github secrets."""
         id_rsa = conn.run('cat /home/ubuntu/.ssh/id_rsa', hide='both')
