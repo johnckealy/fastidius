@@ -1,7 +1,7 @@
 # Fastidius
 
 
-Fastidius is a CLI tool for creating [FastAPI](https://fastapi.tiangolo.com) backends, with integrations for deploying to DigitalOcean via Github.
+Fastidius is a CLI tool for creating [FastAPI](https://fastapi.tiangolo.com) backends, with integrations for deploying to DigitalOcean via Github Actions.
 
 
 ## Installation
@@ -51,7 +51,7 @@ After you've set up your Caddyfile, you can deploy it using
 fastidius deploy-caddy
 ```
 
-Next, we want to set up the secret on Github. This will create a CI/CD pipeline automatically.
+Next, we want to set up the secrets on Github. This will create a CI/CD pipeline automatically.
 ```
 fastidius github-setup
 ```
