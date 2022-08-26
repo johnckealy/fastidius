@@ -3,7 +3,7 @@
 set -e
 
 
-export FASTIDIUS_VERSION=0.0.13
+export FASTIDIUS_VERSION=0.0.14
 
 scripts/compile.sh
 find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
